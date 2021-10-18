@@ -36,7 +36,7 @@ AProjectNCharacter::AProjectNCharacter()
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
-	GetCharacterMovement()->JumpZVelocity = 800.f; // default is 600
+	GetCharacterMovement()->JumpZVelocity = 600.f; // default is 600
 	GetCharacterMovement()->AirControl = 0.1f; // default is 0.2
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
@@ -98,6 +98,8 @@ void AProjectNCharacter::SwitchCameraPOV()
 		GetCameraBoom()->TargetArmLength = MinTargetBoomLength;
 		GetCameraBoom()->SetRelativeLocation(FVector(0, 0, 40));
 
+		bUseControllerRotationYaw = true;
+
 		isFP = true;
 		isTP = false;
 
@@ -107,6 +109,8 @@ void AProjectNCharacter::SwitchCameraPOV()
 	{
 		GetCameraBoom()->TargetArmLength = MaxTargetBoomLength;
 		GetCameraBoom()->SetRelativeLocation(FVector(0, 0, 0));
+
+		bUseControllerRotationYaw = false;
 
 		isFP = false;
 		isTP = true;
@@ -168,5 +172,6 @@ void AProjectNCharacter::MoveRight(float Value)
 
 void AProjectNCharacter::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
 
 }
