@@ -32,7 +32,7 @@ AProjectNCharacter::AProjectNCharacter()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
-
+	
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
@@ -71,7 +71,10 @@ void AProjectNCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	PlayerInputComponent->BindAction("SwitchCamera", IE_Released, this, &AProjectNCharacter::SwitchCameraPOV);
+	PlayerInputComponent->BindAction("SwitchCamera", IE_Pressed, this, &AProjectNCharacter::SwitchCameraPOV);
+
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AProjectNCharacter::Crouch);
+	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &AProjectNCharacter::StopCrouching);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AProjectNCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AProjectNCharacter::MoveRight);
@@ -117,6 +120,16 @@ void AProjectNCharacter::SwitchCameraPOV()
 
 		GetMesh()->SetVisibility(true);
 	}
+}
+
+void AProjectNCharacter::Crouch()
+{
+	ACharacter::Crouch();
+}
+
+void AProjectNCharacter::StopCrouching()
+{
+	ACharacter::UnCrouch();
 }
 
 void AProjectNCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
