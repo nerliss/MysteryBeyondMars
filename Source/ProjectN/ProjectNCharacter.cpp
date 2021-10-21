@@ -24,6 +24,9 @@ AProjectNCharacter::AProjectNCharacter()
 	MaxTargetBoomLength = 600.f;
 	MinTargetBoomLength = 0.f;
 
+	// For wall running
+	bOnWall = false;
+
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
@@ -156,7 +159,7 @@ void AProjectNCharacter::LookUpAtRate(float Rate)
 
 void AProjectNCharacter::MoveForward(float Value)
 {
-	if ((Controller != nullptr) && (Value != 0.0f))
+	if ((Controller != nullptr) && (Value != 0.0f) && !bOnWall)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -170,7 +173,7 @@ void AProjectNCharacter::MoveForward(float Value)
 
 void AProjectNCharacter::MoveRight(float Value)
 {
-	if ( (Controller != nullptr) && (Value != 0.0f) )
+	if ((Controller != nullptr) && (Value != 0.0f) && !bOnWall)
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();

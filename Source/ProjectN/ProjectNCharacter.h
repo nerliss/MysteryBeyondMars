@@ -40,6 +40,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 	bool bGettingUp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool bOnWall;
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "POV")
