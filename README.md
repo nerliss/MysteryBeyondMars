@@ -17,6 +17,10 @@ University project
   * [ ] Interaction with objects itself (read the note, open the door etc.)
   * [ ] Store found notes and letters(?)
   * [ ] Current objective tracker
+- Interactable objects:
+  * [ ] Notes
+  * [ ] Collectables
+  * [ ] Misc.
 - Enemy AI setup:
   * [ ] Patrolling and chasing giant mole
   * [ ] Giants-houseowners regular life cycle(?)
