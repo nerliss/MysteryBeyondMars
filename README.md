@@ -20,8 +20,9 @@ University project
 - Interactable objects:
   * [ ] Notes
   * [ ] Collectables
-  * [ ] Furniture (e.g. drawers)
+  * [x] **Furniture (e.g. drawers)**
   * [ ] Flashlight and\or other portable sources of light
+  * [ ] Make interactable objects more convenient to work with (e.g. Main "use" function, which has different implementations in various derived classes)
   * [ ] Misc.
 - Enemy AI setup:
   * [ ] Patrolling and chasing giant mole
