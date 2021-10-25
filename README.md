@@ -16,10 +16,12 @@ University project
   * [x] **Onscreen object interaction prompt** 
   * [ ] Interaction with objects itself (read the note, open the door etc.)
   * [ ] Store found notes and letters(?)
-  * [ ] Current objective tracker
+  * [x] **Current objective tracker**
 - Interactable objects:
   * [ ] Notes
   * [ ] Collectables
+  * [ ] Furniture (e.g. drawers)
+  * [ ] Flashlight and\or other portable sources of light
   * [ ] Misc.
 - Enemy AI setup:
   * [ ] Patrolling and chasing giant mole
