@@ -6,14 +6,14 @@ University project
 
 - Planet-alike world, "so you could see the horizon..."
 - Advanced movement system setup:
-  * [x] Crouch 
+  * [x] **Crouch** 
   * [ ] Prone(?)
-  * [x] Wall run 
+  * [x] **Wall run** 
   * [ ] Ledge grab
   * [ ] Rope swing(?)
 - Object interaction system setup:
-  * [x] Onscreen name of the object 
-  * [x] Onscreen object interaction prompt 
+  * [x] **Onscreen name of the object** 
+  * [x] **Onscreen object interaction prompt** 
   * [ ] Interaction with objects itself (read the note, open the door etc.)
   * [ ] Store found notes and letters(?)
   * [ ] Current objective tracker
