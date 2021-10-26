@@ -14,11 +14,11 @@ University project
 - Object interaction system setup:
   * [x] **Onscreen name of the object** 
   * [x] **Onscreen object interaction prompt** 
-  * [x] Interaction with objects itself (read the note, open the door etc.)
+  * [x] **Interaction with objects itself (read the note, open the door etc.)**
   * [ ] Store found notes and letters(?)
   * [x] **Current objective tracker**
 - Interactable objects:
-  * [x] Notes
+  * [x] **Notes**
   * [ ] Collectables
   * [x] **Furniture (e.g. drawers)**
   * [ ] Flashlight and\or other portable sources of light
