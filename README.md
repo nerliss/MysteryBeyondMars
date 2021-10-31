@@ -22,7 +22,7 @@ University project
   * [x] **Notes**
   * [ ] Collectables
   * [x] **Furniture (e.g. drawers)**
-  * [ ] Flashlight and\or other portable sources of light
+  * [x] **Flashlight and\or other portable sources of light**
   * [ ] Giant's language vocabulary, that allows to read notes\letters written by giants
   * [x] **Make interactable objects more convenient to work with (e.g. Main "use" function, which has different implementations in various derived classes. Perhaps it can be done using BPI which contains a function or two that respond for the action. just saying)**
   * [ ] Misc.
