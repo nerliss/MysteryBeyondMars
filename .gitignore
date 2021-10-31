@@ -75,3 +75,6 @@ DerivedDataCache/*
 
 # Test directory
 Content/Test/*
+
+# Starter content (unused)
+Content/StarterContent/*
