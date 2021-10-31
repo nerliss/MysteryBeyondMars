@@ -76,5 +76,8 @@ DerivedDataCache/*
 # Test directory
 Content/Test/*
 
-# Starter content (unused)
+# Unused Starter content
 Content/StarterContent/*
+
+# Unused M5VFXVOL2 content
+Content/M5VFXVOL2/*
