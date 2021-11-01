@@ -81,3 +81,6 @@ Content/StarterContent/*
 
 # Unused M5VFXVOL2 content
 Content/M5VFXVOL2/*
+
+# First Person Template (ultra early version)
+Content/FirstPerson/*
