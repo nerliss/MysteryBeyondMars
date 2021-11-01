@@ -12,6 +12,7 @@ University project
   * [ ] Ledge grab
   * [ ] Rope swing(?)
   * [x] **Grappling hook** 
+  * [ ] Swimming
 - Object interaction system setup:
   * [x] **Onscreen name of the object** 
   * [x] **Onscreen object interaction prompt** 
