@@ -32,5 +32,5 @@ University project
   * [ ] Giants-houseowners regular life cycle(?)
 - Simple useful cutscenes (e.g. once player opened the door camera shows them further way)
 - First Person animations
-- HOLY SHIT IT'S EMISSION!!! (Space gas cloud that destroys every living creature on a planet)
+- [x] **HOLY SHIT IT'S EMISSION!!! (Space gas cloud that destroys every living creature on a planet)**
 - [x] **Godrays**
