@@ -10,7 +10,6 @@ University project
   * [ ] Prone(?)
   * [x] **Wall run** 
   * [ ] Ledge grab
-  * [ ] Rope swing(?)
   * [x] **Grappling hook** 
   * [x] **Swimming**
 - Object interaction system setup:
@@ -28,7 +27,7 @@ University project
   * [x] **Make interactable objects more convenient to work with (e.g. Main "use" function, which has different implementations in various derived classes. Perhaps it can be done using BPI which contains a function or two that respond for the action. just saying)**
   * [ ] Misc.
 - Enemy AI setup:
-  * [ ] Patrolling and chasing giant mole
+  * [x] **Patrolling and chasing giant mole**
   * [ ] Giants-houseowners regular life cycle(?)
 - Simple useful cutscenes (e.g. once player opened the door camera shows them further way)
 - First Person animations
