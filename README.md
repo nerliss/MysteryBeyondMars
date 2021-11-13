@@ -7,7 +7,7 @@ University project
 - Planet-alike world, "so you could see the horizon..."
 - Advanced movement system setup:
   * [x] **Crouch** 
-  * [ ] Prone(?)
+  * [x] **Inverse Kinematics (IK) for feet**
   * [x] **Wall run** 
   * [ ] Ledge grab
   * [x] **Grappling hook** 
@@ -27,7 +27,7 @@ University project
   * [x] **Make interactable objects more convenient to work with (e.g. Main "use" function, which has different implementations in various derived classes. Perhaps it can be done using BPI which contains a function or two that respond for the action. just saying)**
   * [ ] Misc.
 - Enemy AI setup:
-  * [x] **Patrolling and chasing giant mole**
+  * [x] **Patrolling and chasing giant rat**
   * [ ] Giants-houseowners regular life cycle(?)
 - Simple useful cutscenes (e.g. once player opened the door camera shows them further way)
 - First Person animations
