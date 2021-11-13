@@ -87,3 +87,13 @@ Content/FirstPerson/*
 
 # Animals pack except lions
 Content/AfricanAnimalsPack/*
+
+# Many different animation packs
+Content/BossyEnemy/*
+Content/CloseCombatAnimSet/*
+Content/MCO_Mocap_Basics/*
+Content/Mannequin/*
+Content/PhoenyxAnimPack3/*
+Content/PoseAnimations/*
+Content/ThirdPerson/*
+Content/ThirdPersonBP/*
