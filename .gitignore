@@ -97,3 +97,6 @@ Content/PhoenyxAnimPack3/*
 Content/PoseAnimations/*
 Content/ThirdPerson/*
 Content/ThirdPersonBP/*
+
+# VoxelPlugin needs to be downloaded from author's GDrive
+Plugins/VoxelFree/*
