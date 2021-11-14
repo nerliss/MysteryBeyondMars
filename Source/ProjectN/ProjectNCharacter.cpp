@@ -101,27 +101,27 @@ void AProjectNCharacter::SwitchCameraPOV()
 
 	if (isTP) // to FirstPerson
 	{
-		GetCameraBoom()->TargetArmLength = MinTargetBoomLength;
-		GetCameraBoom()->SetRelativeLocation(FVector(0, 0, 40));
+		CameraBoom->TargetArmLength = MinTargetBoomLength;
+		CameraBoom->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, "spine_03");
+		CameraBoom->SetRelativeLocation(FVector(-5, 20, 0));
 
 		bUseControllerRotationYaw = true;
 
 		isFP = true;
 		isTP = false;
 
-		GetMesh()->SetVisibility(false);
 	}
 	else if (isFP) // to ThirdPerson
 	{
-		GetCameraBoom()->TargetArmLength = MaxTargetBoomLength;
-		GetCameraBoom()->SetRelativeLocation(FVector(0, 0, 0));
+		CameraBoom->TargetArmLength = MaxTargetBoomLength;
+		CameraBoom->SetRelativeLocation(FVector(0, 0, 0));
+		CameraBoom->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::SnapToTargetIncludingScale);
 
 		bUseControllerRotationYaw = false;
 
 		isFP = false;
 		isTP = true;
 
-		GetMesh()->SetVisibility(true);
 	}
 }
 
@@ -190,4 +190,11 @@ void AProjectNCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AProjectNCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SwitchCameraPOV();
 }
