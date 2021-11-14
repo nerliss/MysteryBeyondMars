@@ -35,13 +35,14 @@ public:
 		bool bCrouching;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
-		bool bProning;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
-		bool bGettingUp;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 		bool bOnWall;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
+		bool bHanging;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
+		bool bInWater;
+
 
 protected:
 
@@ -51,7 +52,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "POV")
 		bool isTP; // third person POV
 
-		// TargetBoom lengths
+	// TargetBoom lengths
 	float MaxTargetBoomLength;
 	float MinTargetBoomLength;
 
@@ -84,10 +85,24 @@ protected:
 	/** Handler for when a touch input stops. */
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
 
-	// Perhaps needs to be used with virtual and override specifiers 
+	/* Crouch*/
 	void Crouch();
 
 	void StopCrouching();
+
+	/* Jump */
+	void Jump();
+
+	void StopJumping();
+
+	/* Float up while in water */
+	UFUNCTION(BlueprintCallable, Category = "Water Movement")
+	void FloatUp();
+
+	/* Dive while in water */
+	UFUNCTION(BlueprintCallable, Category = "Water Movement")
+	void Dive();
+
 
 protected:
 	// APawn interface

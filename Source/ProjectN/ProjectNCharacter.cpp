@@ -8,6 +8,11 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/NHealthComponent.h"
+#include "Math/UnrealMathUtility.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+
+#define DEBUGMESSAGE(x, ...) if(GEngine){GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT(x), __VA_ARGS__));}
 
 //////////////////////////////////////////////////////////////////////////
 // AProjectNCharacter
@@ -24,8 +29,14 @@ AProjectNCharacter::AProjectNCharacter()
 	MaxTargetBoomLength = 600.f;
 	MinTargetBoomLength = 0.f;
 
+	// Water
+	bInWater = false;
+
 	// For wall running
 	bOnWall = false;
+
+	// For ledge climbing
+	bHanging = false;
 
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
@@ -40,7 +51,7 @@ AProjectNCharacter::AProjectNCharacter()
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
 	GetCharacterMovement()->JumpZVelocity = 600.f; // default is 600
-	GetCharacterMovement()->AirControl = 0.1f; // default is 0.2
+	GetCharacterMovement()->AirControl = 1.f; // default is 0.2
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -71,8 +82,11 @@ void AProjectNCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AProjectNCharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AProjectNCharacter::StopJumping);
+
+	PlayerInputComponent->BindAction("FloatUp", IE_Pressed, this, &AProjectNCharacter::FloatUp);
+	PlayerInputComponent->BindAction("Dive", IE_Pressed, this, &AProjectNCharacter::Dive);
 
 	PlayerInputComponent->BindAction("SwitchCamera", IE_Pressed, this, &AProjectNCharacter::SwitchCameraPOV);
 
@@ -89,11 +103,6 @@ void AProjectNCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAxis("TurnRate", this, &AProjectNCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AProjectNCharacter::LookUpAtRate);
-
-	// handle touch devices
-	PlayerInputComponent->BindTouch(IE_Pressed, this, &AProjectNCharacter::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &AProjectNCharacter::TouchStopped);
-
 }
 
 void AProjectNCharacter::SwitchCameraPOV()
@@ -127,22 +136,68 @@ void AProjectNCharacter::SwitchCameraPOV()
 
 void AProjectNCharacter::Crouch()
 {
-	ACharacter::Crouch();
+	if (!bInWater)
+	{
+		ACharacter::Crouch();
+		bCrouching = true;
+	}
 }
 
 void AProjectNCharacter::StopCrouching()
 {
 	ACharacter::UnCrouch();
+	bCrouching = false;
 }
 
-void AProjectNCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
+void AProjectNCharacter::Jump()
 {
-		Jump();
+	if (!bHanging) 
+	{
+		if (!bInWater) 
+		{
+			ACharacter::Jump();
+		}
+	}
 }
 
-void AProjectNCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
+void AProjectNCharacter::StopJumping()
 {
-		StopJumping();
+	ACharacter::StopJumping();
+}
+
+void AProjectNCharacter::FloatUp()
+{
+	if (bInWater)
+	{
+		// Set location and velocity of character
+		SetActorLocation(GetActorLocation() + FVector(0, 0, 5.f));
+		FVector CharacterVelocity = GetCharacterMovement()->Velocity;
+		CharacterVelocity = FVector(GetVelocity().X, GetVelocity().Y, 0.f);
+
+		// Temp
+		// FRotator(GetActorRotation().Roll, 90.f, GetActorRotation().Yaw)
+
+		// Set their rotation
+		FRotator RInterpToTarget = FRotator(0, 35, 35); // Target of interpolation
+		FRotator ActorRotationInterpolated = FMath::RInterpTo(GetActorRotation(), RInterpToTarget, GetWorld()->GetDeltaSeconds(), 5.f);
+		SetActorRotation(FRotator(ActorRotationInterpolated));
+	}
+}
+
+void AProjectNCharacter::Dive()
+{
+	if (bInWater)
+	{
+		// Set location and velocity of character
+		SetActorLocation(GetActorLocation() + FVector(0, 0, -5.f));
+		FVector CharacterVelocity = GetCharacterMovement()->Velocity;
+		CharacterVelocity = FVector(GetVelocity().X, GetVelocity().Y, 0.f);
+
+		// Set their rotation
+		FRotator RInterpToTarget = GetActorRotation(); // Target of interpolation
+		FRotator ActorRotationInterpolated = FMath::RInterpTo(GetActorRotation(), RInterpToTarget, GetWorld()->GetDeltaSeconds(), 5.f);
+		SetActorRotation(FRotator(ActorRotationInterpolated));
+	}
 }
 
 void AProjectNCharacter::TurnAtRate(float Rate)
@@ -189,7 +244,7 @@ void AProjectNCharacter::MoveRight(float Value)
 void AProjectNCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 }
 
 void AProjectNCharacter::BeginPlay()
