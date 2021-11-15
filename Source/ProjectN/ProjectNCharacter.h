@@ -97,12 +97,16 @@ protected:
 
 	/* Float up while in water */
 	UFUNCTION(BlueprintCallable, Category = "Water Movement")
-	void FloatUp();
+	void FloatUp(float Value);
 
 	/* Dive while in water */
 	UFUNCTION(BlueprintCallable, Category = "Water Movement")
-	void Dive();
+	void Dive(float Value);
 
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void Death();
+
+	void RagdollSnapshot();
 
 protected:
 	// APawn interface

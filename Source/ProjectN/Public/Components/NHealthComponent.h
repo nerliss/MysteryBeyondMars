@@ -16,11 +16,13 @@ public:
 	// Sets default values for this component's properties
 	UNHealthComponent();
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HealthComponent")
+	bool bDead;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-
-	bool isDead;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HealthComponent")
 	float CurrentHealth;
@@ -28,4 +30,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "HealthComponent")
 	float MaxHealth;
 		
+
+
 };

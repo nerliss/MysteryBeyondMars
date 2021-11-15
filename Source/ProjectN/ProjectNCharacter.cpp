@@ -12,6 +12,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
+// Print string on screen macro
 #define DEBUGMESSAGE(x, ...) if(GEngine){GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT(x), __VA_ARGS__));}
 
 //////////////////////////////////////////////////////////////////////////
@@ -26,6 +27,7 @@ AProjectNCharacter::AProjectNCharacter()
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
+	// Camera 
 	MaxTargetBoomLength = 600.f;
 	MinTargetBoomLength = 0.f;
 
@@ -70,9 +72,6 @@ AProjectNCharacter::AProjectNCharacter()
 	// Default POV condition
 	isTP = true;
 	isFP = false;
-
-	
-
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -85,13 +84,15 @@ void AProjectNCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AProjectNCharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AProjectNCharacter::StopJumping);
 
-	PlayerInputComponent->BindAction("FloatUp", IE_Pressed, this, &AProjectNCharacter::FloatUp);
-	PlayerInputComponent->BindAction("Dive", IE_Pressed, this, &AProjectNCharacter::Dive);
-
 	PlayerInputComponent->BindAction("SwitchCamera", IE_Pressed, this, &AProjectNCharacter::SwitchCameraPOV);
 
+	// Crouch
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AProjectNCharacter::Crouch);
 	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &AProjectNCharacter::StopCrouching);
+
+	// Swim up and dive while in water
+	PlayerInputComponent->BindAxis("FloatUp", this, &AProjectNCharacter::FloatUp);
+	PlayerInputComponent->BindAxis("Dive", this, &AProjectNCharacter::Dive);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AProjectNCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AProjectNCharacter::MoveRight);
@@ -118,7 +119,6 @@ void AProjectNCharacter::SwitchCameraPOV()
 
 		isFP = true;
 		isTP = false;
-
 	}
 	else if (isFP) // to ThirdPerson
 	{
@@ -130,7 +130,6 @@ void AProjectNCharacter::SwitchCameraPOV()
 
 		isFP = false;
 		isTP = true;
-
 	}
 }
 
@@ -165,39 +164,45 @@ void AProjectNCharacter::StopJumping()
 	ACharacter::StopJumping();
 }
 
-void AProjectNCharacter::FloatUp()
+void AProjectNCharacter::FloatUp(float Value)
 {
-	if (bInWater)
+	if (bInWater && Value != 0.f)
 	{
-		// Set location and velocity of character
-		SetActorLocation(GetActorLocation() + FVector(0, 0, 5.f));
-		FVector CharacterVelocity = GetCharacterMovement()->Velocity;
-		CharacterVelocity = FVector(GetVelocity().X, GetVelocity().Y, 0.f);
-
-		// Temp
-		// FRotator(GetActorRotation().Roll, 90.f, GetActorRotation().Yaw)
-
-		// Set their rotation
-		FRotator RInterpToTarget = FRotator(0, 35, 35); // Target of interpolation
-		FRotator ActorRotationInterpolated = FMath::RInterpTo(GetActorRotation(), RInterpToTarget, GetWorld()->GetDeltaSeconds(), 5.f);
-		SetActorRotation(FRotator(ActorRotationInterpolated));
+		FVector NewDirectionVector = FVector(FollowCamera->GetForwardVector().X, FollowCamera->GetForwardVector().Y, 1.f); 
+		AddMovementInput(NewDirectionVector, Value);
 	}
 }
 
-void AProjectNCharacter::Dive()
+void AProjectNCharacter::Dive(float Value)
 {
-	if (bInWater)
+	if (bInWater && Value != 0.f)
 	{
-		// Set location and velocity of character
-		SetActorLocation(GetActorLocation() + FVector(0, 0, -5.f));
-		FVector CharacterVelocity = GetCharacterMovement()->Velocity;
-		CharacterVelocity = FVector(GetVelocity().X, GetVelocity().Y, 0.f);
-
-		// Set their rotation
-		FRotator RInterpToTarget = GetActorRotation(); // Target of interpolation
-		FRotator ActorRotationInterpolated = FMath::RInterpTo(GetActorRotation(), RInterpToTarget, GetWorld()->GetDeltaSeconds(), 5.f);
-		SetActorRotation(FRotator(ActorRotationInterpolated));
+		FVector NewDirectionVector = FVector(FollowCamera->GetForwardVector().X, FollowCamera->GetForwardVector().Y, -1.f);
+		AddMovementInput(NewDirectionVector, Value);
 	}
+}
+
+void AProjectNCharacter::Death()
+{
+	if (!HealthComp->bDead)
+	{
+		HealthComp->bDead = true;
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GetMesh()->SetSimulatePhysics(true);
+		DetachFromControllerPendingDestroy();
+
+		FTimerHandle SnapshotTimer;
+		GetWorldTimerManager().SetTimer(SnapshotTimer, this, &AProjectNCharacter::RagdollSnapshot, 2.f, false);
+	}
+}
+
+void AProjectNCharacter::RagdollSnapshot()
+{
+	GetMesh()->GetAnimInstance()->SavePoseSnapshot("Ragdoll");
+	GetMesh()->SetSimulatePhysics(false);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	DEBUGMESSAGE("Yo Ragdoll snapshot function is called, wassup?");
 }
 
 void AProjectNCharacter::TurnAtRate(float Rate)

@@ -7,7 +7,7 @@
 UNHealthComponent::UNHealthComponent()
 {
 	MaxHealth = 100.f;
-	isDead = false;
+	bDead = false;
 
 
 }
