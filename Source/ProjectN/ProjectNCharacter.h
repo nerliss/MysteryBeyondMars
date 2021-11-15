@@ -7,6 +7,8 @@
 #include "ProjectNCharacter.generated.h"
 
 class UNHealthComponent;
+class USpotLightComponent;
+class USoundBase;
 
 UCLASS(config = Game)
 class AProjectNCharacter : public ACharacter
@@ -14,7 +16,7 @@ class AProjectNCharacter : public ACharacter
 	GENERATED_BODY()
 
 		/** Camera boom positioning the camera behind the character */
-		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class USpringArmComponent* CameraBoom;
 
 	/** Follow camera */
@@ -46,6 +48,17 @@ public:
 
 protected:
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Flashlight")
+	USoundBase* FlashlightSound;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USpotLightComponent* Flashlight;
+
+	bool bFlashlightTurnedOn;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+		UNHealthComponent* HealthComp;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "POV")
 		bool isFP; // first person POV
 
@@ -55,9 +68,6 @@ protected:
 	// TargetBoom lengths
 	float MaxTargetBoomLength;
 	float MinTargetBoomLength;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-		UNHealthComponent* HealthComp;
 
 	void SwitchCameraPOV();
 
@@ -103,10 +113,15 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Water Movement")
 	void Dive(float Value);
 
+	/* Death function with saving pose snapshot */
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void Death();
 
+	/* Save pose snapshot and turn off collision for mesh */
 	void RagdollSnapshot();
+
+	/* Turn off / turn on the flash light */
+	void SwitchFlashlight();
 
 protected:
 	// APawn interface

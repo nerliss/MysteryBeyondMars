@@ -4,6 +4,8 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/SpotLightComponent.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -22,10 +24,43 @@ AProjectNCharacter::AProjectNCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	HealthComp = CreateDefaultSubobject<UNHealthComponent>(TEXT("HealthComp"));
-
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+
+	// Configure character movement
+	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
+	GetCharacterMovement()->JumpZVelocity = 600.f; // default is 600
+	GetCharacterMovement()->AirControl = 1.f; // default is 0.2
+
+	// Create a camera boom (pulls in towards the player if there is a collision)
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->TargetArmLength = MaxTargetBoomLength; // The camera follows at this distance behind the character	
+	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
+
+	// Create a follow camera
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	// Create a health component
+	HealthComp = CreateDefaultSubobject<UNHealthComponent>(TEXT("HealthComp"));
+
+	// Create and configure flashlight
+	Flashlight = CreateDefaultSubobject<USpotLightComponent>(TEXT("Flashlight"));
+	Flashlight->SetupAttachment(GetMesh(), "ChestFlashlightSocket");
+	Flashlight->SetVisibility(false);
+	Flashlight->Intensity = 30000.f;
+	Flashlight->LightColor = FColor::FromHex("E2A119FF");
+	Flashlight->AttenuationRadius = 16384.f;
+	Flashlight->OuterConeAngle = 22.f;
+	Flashlight->SoftSourceRadius = 100.f;
+	Flashlight->SourceLength = 100.f;
+	Flashlight->bUseTemperature = true;
+	Flashlight->IntensityUnits = ELightUnits::Unitless;
+
+	bFlashlightTurnedOn = false;
 
 	// Camera 
 	MaxTargetBoomLength = 600.f;
@@ -48,26 +83,6 @@ AProjectNCharacter::AProjectNCharacter()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
-	
-	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
-	GetCharacterMovement()->JumpZVelocity = 600.f; // default is 600
-	GetCharacterMovement()->AirControl = 1.f; // default is 0.2
-
-	// Create a camera boom (pulls in towards the player if there is a collision)
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = MaxTargetBoomLength; // The camera follows at this distance behind the character	
-	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
-
-	// Create a follow camera
-	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
-	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
-
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
-	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 
 	// Default POV condition
 	isTP = true;
@@ -89,6 +104,9 @@ void AProjectNCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	// Crouch
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AProjectNCharacter::Crouch);
 	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &AProjectNCharacter::StopCrouching);
+
+	// Switch on/off the flashlight
+	PlayerInputComponent->BindAction("SwitchFlashlight", IE_Pressed, this, &AProjectNCharacter::SwitchFlashlight);
 
 	// Swim up and dive while in water
 	PlayerInputComponent->BindAxis("FloatUp", this, &AProjectNCharacter::FloatUp);
@@ -203,6 +221,30 @@ void AProjectNCharacter::RagdollSnapshot()
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	DEBUGMESSAGE("Yo Ragdoll snapshot function is called, wassup?");
+}
+
+void AProjectNCharacter::SwitchFlashlight()
+{
+	if (bFlashlightTurnedOn)
+	{
+		Flashlight->SetVisibility(false);
+		bFlashlightTurnedOn = false;
+
+		if (FlashlightSound)
+		{
+			UGameplayStatics::SpawnSound2D(this, FlashlightSound, 0.7f);
+		}
+	}
+	else
+	{
+		Flashlight->SetVisibility(true);
+		bFlashlightTurnedOn = true;
+
+		if (FlashlightSound)
+		{
+			UGameplayStatics::SpawnSound2D(this, FlashlightSound, 0.7f);
+		}
+	}
 }
 
 void AProjectNCharacter::TurnAtRate(float Rate)
