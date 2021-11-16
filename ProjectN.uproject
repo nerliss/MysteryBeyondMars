@@ -26,10 +26,6 @@
 		{
 			"Name": "SunPosition",
 			"Enabled": true
-		},
-		{
-			"Name": "MultiUserClient",
-			"Enabled": true
 		}
 	]
 }
