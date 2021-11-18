@@ -87,6 +87,9 @@ AProjectNCharacter::AProjectNCharacter()
 	// Default POV condition
 	isTP = true;
 	isFP = false;
+
+	// Default Objective
+	CurrentObjective = "";
 }
 
 //////////////////////////////////////////////////////////////////////////

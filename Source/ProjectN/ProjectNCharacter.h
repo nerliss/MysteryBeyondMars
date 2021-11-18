@@ -45,6 +45,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 		bool bInWater;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "HUD")
+	FString CurrentObjective;
+
+
 
 protected:
 
@@ -89,11 +93,11 @@ protected:
 	 */
 	void LookUpAtRate(float Rate);
 
-	/** Handler for when a touch input begins. */
-	void TouchStarted(ETouchIndex::Type FingerIndex, FVector Location);
-
-	/** Handler for when a touch input stops. */
-	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
+// 	/** Handler for when a touch input begins. */
+// 	void TouchStarted(ETouchIndex::Type FingerIndex, FVector Location);
+// 
+// 	/** Handler for when a touch input stops. */
+// 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
 
 	/* Crouch*/
 	void Crouch();

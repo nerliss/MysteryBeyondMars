@@ -1,0 +1,21 @@
+{
+	"Metadata":
+	{
+		"Classes":
+		{
+			"NObjective":
+			{
+				"Fields":
+				{
+					"Objective":
+					{
+						"Bools":
+						{
+							"IsFavorite": true
+						}
+					}
+				}
+			}
+		}
+	}
+}
