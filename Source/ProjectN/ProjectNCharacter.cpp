@@ -213,7 +213,7 @@ void AProjectNCharacter::Death()
 		DetachFromControllerPendingDestroy();
 
 		FTimerHandle SnapshotTimer;
-		GetWorldTimerManager().SetTimer(SnapshotTimer, this, &AProjectNCharacter::RagdollSnapshot, 2.f, false);
+		GetWorldTimerManager().SetTimer(SnapshotTimer, this, &AProjectNCharacter::RagdollSnapshot, 3.f, false);
 	}
 }
 
