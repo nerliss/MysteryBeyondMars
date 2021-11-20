@@ -307,7 +307,7 @@ void AProjectNCharacter::SubstractOxygen()
 		Oxygen = FMath::Clamp(Oxygen - 5.f, 0.f, 100.f);
 		DEBUGMESSAGE("%f", Oxygen);
 
-		if (Oxygen <= 0.f) // TODO: Apply damage every sec once oxygen >= 0
+		if (Oxygen <= 0.f) // TODO: Apply damage every sec once oxygen <= 0
 		{
 			Death();
 		}
