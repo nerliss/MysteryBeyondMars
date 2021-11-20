@@ -9,6 +9,7 @@
 class UNHealthComponent;
 class USpotLightComponent;
 class USoundBase;
+class UBoxComponent;
 
 UCLASS(config = Game)
 class AProjectNCharacter : public ACharacter
@@ -27,27 +28,47 @@ public:
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-		float BaseTurnRate;
+	float BaseTurnRate;
 
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-		float BaseLookUpRate;
+	float BaseLookUpRate;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
-		bool bCrouching;
+	bool bCrouching;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
-		bool bOnWall;
+	bool bOnWall;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
-		bool bHanging;
+	bool bHanging;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
-		bool bInWater;
+	bool bInWater;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool bSubmerged;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "HUD")
 	FString CurrentObjective;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Oxygen")
+	float Oxygen;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Oxygen")
+	float OxygenMax;
+
+	FTimerHandle SubstractOxygenTimer;
+
+	FTimerHandle AddOxygenTimer;
+
+	// Primarily used for UI
+	UFUNCTION(BlueprintImplementableEvent, Category = "Water movement events")
+	void OnSubmerged();
+
+	// Primarily used for UI
+	UFUNCTION(BlueprintImplementableEvent, Category = "Water movement events")
+	void OnEmerged();
 
 
 protected:
@@ -61,13 +82,16 @@ protected:
 	bool bFlashlightTurnedOn;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-		UNHealthComponent* HealthComp;
+	UNHealthComponent* HealthComp;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "POV")
-		bool isFP; // first person POV
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UBoxComponent* BoxHead;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "POV")
-		bool isTP; // third person POV
+	bool isFP; // first person POV
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "POV")
+	bool isTP; // third person POV
 
 	// TargetBoom lengths
 	float MaxTargetBoomLength;
@@ -117,6 +141,12 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Water Movement")
 	void Dive(float Value);
 
+	UFUNCTION()
+	void AddOxygen();
+
+	UFUNCTION()
+	void SubstractOxygen();
+
 	/* Death function with saving pose snapshot */
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void Death();
@@ -142,5 +172,12 @@ public:
 
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 };
 

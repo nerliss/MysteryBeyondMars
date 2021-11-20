@@ -49,13 +49,14 @@ void ANObjective::Tick(float DeltaTime)
 
 }
 
+// On overlap begin event 
 void ANObjective::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// Cast to player
-	AProjectNCharacter* Character = Cast<AProjectNCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	AProjectNCharacter* Character = Cast<AProjectNCharacter>(OtherActor);
 
-	if (OtherActor&& OtherActor == Character)
+	if (OtherActor && OtherActor == Character) // Known bug: triggers even by an AI because they all derive from ProjectNCharacter. TODO: Separate AI base class
 	{
 		// Set player's current objective to this actor's
 		Character->CurrentObjective = Objective;
@@ -65,5 +66,9 @@ void ANObjective::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 		{
 			UGameplayStatics::PlaySound2D(GetWorld(), ObjectiveUpdateSound);
 		}
+	}
+	else
+	{
+		return;
 	}
 }

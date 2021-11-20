@@ -6,9 +6,11 @@
 #include "Components/InputComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Components/AudioComponent.h"
+#include "Components/BoxComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/PhysicsVolume.h"
 #include "Components/NHealthComponent.h"
 #include "Math/UnrealMathUtility.h"
 #include "Kismet/GameplayStatics.h"
@@ -62,9 +64,25 @@ AProjectNCharacter::AProjectNCharacter()
 
 	bFlashlightTurnedOn = false;
 
+	// Create box collision for head
+	BoxHead = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxHead"));
+	BoxHead->SetupAttachment(GetMesh(), "head");
+	BoxHead->SetBoxExtent(FVector(8, 11, 11));
+	BoxHead->SetRelativeLocation(FVector(19, 3, 1));
+
 	// Camera 
 	MaxTargetBoomLength = 600.f;
 	MinTargetBoomLength = 0.f;
+
+	// Default OxygenMax
+	OxygenMax = 100.f;
+
+	// Default Objective
+	CurrentObjective = "";
+
+	// set our turn rates for input
+	BaseTurnRate = 45.f;
+	BaseLookUpRate = 45.f;
 
 	// Water
 	bInWater = false;
@@ -75,10 +93,6 @@ AProjectNCharacter::AProjectNCharacter()
 	// For ledge climbing
 	bHanging = false;
 
-	// set our turn rates for input
-	BaseTurnRate = 45.f;
-	BaseLookUpRate = 45.f;
-
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -87,9 +101,6 @@ AProjectNCharacter::AProjectNCharacter()
 	// Default POV condition
 	isTP = true;
 	isFP = false;
-
-	// Default Objective
-	CurrentObjective = "";
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -126,6 +137,83 @@ void AProjectNCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AProjectNCharacter::LookUpAtRate);
 }
+
+void AProjectNCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Bind overlap events to BoxHead's 
+	BoxHead->OnComponentBeginOverlap.AddDynamic(this, &AProjectNCharacter::OnOverlapBegin);
+	BoxHead->OnComponentEndOverlap.AddDynamic(this, &AProjectNCharacter::OnOverlapEnd);
+
+	Oxygen = OxygenMax;
+
+	SwitchCameraPOV();
+}
+
+void AProjectNCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+// Set bSubmerged to true once BoxHead overlaps a water volume
+void AProjectNCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	APhysicsVolume* WaterVolume = Cast<APhysicsVolume>(OtherActor);
+
+	if (OtherActor && OtherActor != this && OtherActor == WaterVolume) // Check whether other actor is water volume and not self
+	{
+		if (WaterVolume->bWaterVolume) // Assure that this physics volume is water volume
+		{
+			bSubmerged = true;
+			bInWater = true;
+
+			// Substract oxygen every second
+			GetWorldTimerManager().SetTimer(SubstractOxygenTimer, this, &AProjectNCharacter::SubstractOxygen, 1.f, true, 1.f);
+
+			// Stop AddOxygen timer if it's active
+			if (GetWorldTimerManager().IsTimerActive(AddOxygenTimer))
+			{
+				GetWorldTimerManager().ClearTimer(AddOxygenTimer);
+			}
+
+			OnSubmerged(); // Call blueprint event
+		}
+	}
+}
+
+// Set bSubmerged to false once BoxHead overlaps a water volume
+void AProjectNCharacter::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	APhysicsVolume* WaterVolume = Cast<APhysicsVolume>(OtherActor);
+
+	if (OtherActor && (OtherActor != this) && (OtherActor == WaterVolume)) // Check whether other actor is water volume and not self
+	{
+		if (WaterVolume->bWaterVolume) // Assure that this physics volume is water volume
+		{
+			bSubmerged = false;
+
+			// Stop SubstractOxygen timer if it's active
+			if (GetWorldTimerManager().IsTimerActive(SubstractOxygenTimer))
+			{
+				GetWorldTimerManager().ClearTimer(SubstractOxygenTimer);
+			}
+
+			// Add oxygen every second
+			GetWorldTimerManager().SetTimer(AddOxygenTimer, this, &AProjectNCharacter::AddOxygen, 1.f, true, 1.f);
+
+			// Stop adding oxygen once Oxygen greater than or equal to OxygenMax (100.f by default)
+			if ((Oxygen >= OxygenMax) && (GetWorldTimerManager().IsTimerActive(AddOxygenTimer)))
+			{
+				GetWorldTimerManager().ClearTimer(AddOxygenTimer);
+			}
+
+			OnEmerged(); // Call blueprint event
+		}
+	}
+}
+
 
 void AProjectNCharacter::SwitchCameraPOV()
 {
@@ -200,6 +288,29 @@ void AProjectNCharacter::Dive(float Value)
 	{
 		FVector NewDirectionVector = FVector(FollowCamera->GetForwardVector().X, FollowCamera->GetForwardVector().Y, -1.f);
 		AddMovementInput(NewDirectionVector, Value);
+	}
+}
+
+void AProjectNCharacter::AddOxygen()
+{
+	if (!bSubmerged && (Oxygen < OxygenMax))
+	{
+		Oxygen = FMath::Clamp(Oxygen + 10.f, 0.f, 100.f);
+		DEBUGMESSAGE("%f", Oxygen);
+	}
+}
+
+void AProjectNCharacter::SubstractOxygen()
+{
+	if (bSubmerged && (Oxygen >= 0))
+	{
+		Oxygen = FMath::Clamp(Oxygen - 5.f, 0.f, 100.f);
+		DEBUGMESSAGE("%f", Oxygen);
+
+		if (Oxygen <= 0.f) // TODO: Apply damage every sec once oxygen >= 0
+		{
+			Death();
+		}
 	}
 }
 
@@ -289,17 +400,4 @@ void AProjectNCharacter::MoveRight(float Value)
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
-}
-
-void AProjectNCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	
-}
-
-void AProjectNCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-
-	SwitchCameraPOV();
 }

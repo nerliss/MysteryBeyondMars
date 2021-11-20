@@ -12,7 +12,6 @@ UNHealthComponent::UNHealthComponent()
 
 }
 
-
 // Called when the game starts
 void UNHealthComponent::BeginPlay()
 {
