@@ -56,7 +56,7 @@ void ANObjective::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 	// Cast to player
 	AProjectNCharacter* Character = Cast<AProjectNCharacter>(OtherActor);
 
-	if (OtherActor && OtherActor == Character) // Known bug: triggers even by an AI because they all derive from ProjectNCharacter. TODO: Separate AI base class
+	if (OtherActor && OtherActor == Character) 
 	{
 		// Set player's current objective to this actor's
 		Character->CurrentObjective = Objective;
