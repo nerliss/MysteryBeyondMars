@@ -26,7 +26,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UBoxComponent* BoxCollision;
 
-	/* For testing */
+	// For testing
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UArrowComponent* ArrowComponent;
 

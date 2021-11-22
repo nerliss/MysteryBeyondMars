@@ -52,7 +52,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "HUD")
 	FString CurrentObjective;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Oxygen")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Oxygen")
 	float Oxygen;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Oxygen")
@@ -62,14 +62,19 @@ public:
 
 	FTimerHandle AddOxygenTimer;
 
-	// Primarily used for UI
+	// Both used in fade in\out animation for Oxygen Bar
 	UFUNCTION(BlueprintImplementableEvent, Category = "Water movement events")
 	void OnSubmerged();
 
-	// Primarily used for UI
 	UFUNCTION(BlueprintImplementableEvent, Category = "Water movement events")
 	void OnEmerged();
 
+	// Both used in Oxygen Bar set percent
+	UFUNCTION(BlueprintImplementableEvent, Category = "Water movement events")
+	void OnOxygenSubstracted();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Water movement events")
+	void OnOxygenAdded();
 
 protected:
 

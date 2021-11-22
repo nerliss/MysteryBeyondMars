@@ -221,8 +221,8 @@ void AProjectNCharacter::SwitchCameraPOV()
 	if (isTP) // to FirstPerson
 	{
 		CameraBoom->TargetArmLength = MinTargetBoomLength;
-		CameraBoom->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, "spine_03");
-		CameraBoom->SetRelativeLocation(FVector(-5, 20, 0));
+		CameraBoom->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, "head");
+		CameraBoom->SetRelativeLocation(FVector(-14.f, 30.f, 0.f));
 
 		bUseControllerRotationYaw = true;
 
@@ -232,7 +232,7 @@ void AProjectNCharacter::SwitchCameraPOV()
 	else if (isFP) // to ThirdPerson
 	{
 		CameraBoom->TargetArmLength = MaxTargetBoomLength;
-		CameraBoom->SetRelativeLocation(FVector(0, 0, 0));
+		CameraBoom->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
 		CameraBoom->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::SnapToTargetIncludingScale);
 
 		bUseControllerRotationYaw = false;
@@ -295,8 +295,11 @@ void AProjectNCharacter::AddOxygen()
 {
 	if (!bSubmerged && (Oxygen < OxygenMax))
 	{
-		Oxygen = FMath::Clamp(Oxygen + 10.f, 0.f, 100.f);
-		DEBUGMESSAGE("%f", Oxygen);
+		Oxygen = FMath::Clamp(Oxygen + 25.f, 0.f, 100.f);
+
+		/*DEBUGMESSAGE("%f", Oxygen);*/
+
+		OnOxygenAdded();
 	}
 }
 
@@ -304,8 +307,11 @@ void AProjectNCharacter::SubstractOxygen()
 {
 	if (bSubmerged && (Oxygen >= 0))
 	{
-		Oxygen = FMath::Clamp(Oxygen - 5.f, 0.f, 100.f);
-		DEBUGMESSAGE("%f", Oxygen);
+		Oxygen = FMath::Clamp(Oxygen - 3.f, 0.f, 100.f);
+
+		/*DEBUGMESSAGE("%f", Oxygen);*/
+
+		OnOxygenSubstracted();
 
 		if (Oxygen <= 0.f) // TODO: Apply damage every sec once oxygen <= 0
 		{
