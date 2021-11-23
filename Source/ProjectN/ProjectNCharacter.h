@@ -92,11 +92,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UBoxComponent* BoxHead;
 
+	// First person POV
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "POV")
-	bool isFP; // first person POV
+	bool isFP; 
 
+	// Third person POV
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "POV")
-	bool isTP; // third person POV
+	bool isTP; 
 
 	// TargetBoom lengths
 	float MaxTargetBoomLength;
