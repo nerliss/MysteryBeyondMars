@@ -62,17 +62,19 @@ public:
 
 	FTimerHandle AddOxygenTimer;
 
-	// Both used in fade in\out animation for Oxygen Bar
+	/** Used in fade in\out animation for Oxygen Bar. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Water movement events")
 	void OnSubmerged();
 
+	/** Used in fade in\out animation for Oxygen Bar. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Water movement events")
 	void OnEmerged();
 
-	// Both used in Oxygen Bar set percent
+	/** Used in Oxygen Bar set percent. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Water movement events")
 	void OnOxygenSubstracted();
 
+	/** Used in Oxygen Bar set percent. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Water movement events")
 	void OnOxygenAdded();
 
@@ -92,13 +94,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UBoxComponent* BoxHead;
 
-	// First person POV
+	/** First person POV. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "POV")
 	bool isFP; 
 
-	// Third person POV
+	/** Third person POV. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "POV")
 	bool isTP; 
+
+	/** Trace length that depends on current POV. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Interaction")
+	float TraceLength;
 
 	// TargetBoom lengths
 	float MaxTargetBoomLength;
@@ -124,27 +130,23 @@ protected:
 	 */
 	void LookUpAtRate(float Rate);
 
-// 	/** Handler for when a touch input begins. */
-// 	void TouchStarted(ETouchIndex::Type FingerIndex, FVector Location);
-// 
-// 	/** Handler for when a touch input stops. */
-// 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
-
-	/* Crouch*/
+	/** Crouch. */
 	void Crouch();
 
+	/** UnCrouch. */
 	void StopCrouching();
 
-	/* Jump */
+	/** Jump. */
 	void Jump();
 
+	/** Stop jumping. */
 	void StopJumping();
 
-	/* Float up while in water */
+	/** Float up while in water. */
 	UFUNCTION(BlueprintCallable, Category = "Water Movement")
 	void FloatUp(float Value);
 
-	/* Dive while in water */
+	/** Dive while in water. */
 	UFUNCTION(BlueprintCallable, Category = "Water Movement")
 	void Dive(float Value);
 
@@ -154,15 +156,19 @@ protected:
 	UFUNCTION()
 	void SubstractOxygen();
 
-	/* Death function with saving pose snapshot */
+	/** Death function with saving pose snapshot. */
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void Death();
 
-	/* Save pose snapshot and turn off collision for mesh */
+	/** Save pose snapshot and turn off collision for mesh. */
 	void RagdollSnapshot();
 
-	/* Turn off / turn on the flash light */
+	/** Turn off / turn on the flash light. */
 	void SwitchFlashlight();
+
+	/** This function allows to set JumpCurrentCount from Blueprints. */
+	UFUNCTION(BlueprintCallable, Category = "Jump")
+	void SetJumpCurrentCount(int NewCurrentJumpCount);
 
 protected:
 	// APawn interface

@@ -37,7 +37,7 @@ AProjectNCharacter::AProjectNCharacter()
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->SetupAttachment(GetCapsuleComponent(), "head");
 	CameraBoom->TargetArmLength = MaxTargetBoomLength; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
@@ -71,7 +71,7 @@ AProjectNCharacter::AProjectNCharacter()
 	BoxHead->SetRelativeLocation(FVector(19, 3, 1));
 
 	// Camera 
-	MaxTargetBoomLength = 600.f;
+	MaxTargetBoomLength = 400.f;
 	MinTargetBoomLength = 0.f;
 
 	// Default OxygenMax
@@ -148,6 +148,9 @@ void AProjectNCharacter::BeginPlay()
 
 	Oxygen = OxygenMax;
 
+	// Default value of interaction trace length
+	TraceLength = 350.f; 
+
 	SwitchCameraPOV();
 }
 
@@ -220,11 +223,18 @@ void AProjectNCharacter::SwitchCameraPOV()
 
 	if (isTP) // to FirstPerson
 	{
+		FVector NewBoomLocation = FVector(-14.f, 30.f, 0.f);
+
 		CameraBoom->TargetArmLength = MinTargetBoomLength;
 		CameraBoom->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, "head");
-		CameraBoom->SetRelativeLocation(FVector(-14.f, 30.f, 0.f));
+		CameraBoom->SetRelativeLocation(NewBoomLocation);
+		CameraBoom->SocketOffset = FVector(0.f, 0.f, 0.f);
+
+		//FollowCamera->SetRelativeLocation(NewBoomLocation); 
 
 		bUseControllerRotationYaw = true;
+
+		TraceLength = 350.f;
 
 		isFP = true;
 		isTP = false;
@@ -232,10 +242,13 @@ void AProjectNCharacter::SwitchCameraPOV()
 	else if (isFP) // to ThirdPerson
 	{
 		CameraBoom->TargetArmLength = MaxTargetBoomLength;
-		CameraBoom->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
 		CameraBoom->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::SnapToTargetIncludingScale);
+		CameraBoom->SetRelativeLocation(FVector(0.f, 0.f, 65.f));
+		CameraBoom->SocketOffset = FVector(0.f, 80.f, 0.f);
 
 		bUseControllerRotationYaw = false;
+
+		TraceLength = 600.f;
 
 		isFP = false;
 		isTP = true;
@@ -277,7 +290,9 @@ void AProjectNCharacter::FloatUp(float Value)
 {
 	if (bInWater && Value != 0.f)
 	{
+		// Set a diagonal-alike vector to move along
 		FVector NewDirectionVector = FVector(FollowCamera->GetForwardVector().X, FollowCamera->GetForwardVector().Y, 1.f); 
+
 		AddMovementInput(NewDirectionVector, Value);
 	}
 }
@@ -286,7 +301,9 @@ void AProjectNCharacter::Dive(float Value)
 {
 	if (bInWater && Value != 0.f)
 	{
+		// Set a diagonal-alike vector to move along
 		FVector NewDirectionVector = FVector(FollowCamera->GetForwardVector().X, FollowCamera->GetForwardVector().Y, -1.f);
+
 		AddMovementInput(NewDirectionVector, Value);
 	}
 }
@@ -365,6 +382,11 @@ void AProjectNCharacter::SwitchFlashlight()
 			UGameplayStatics::SpawnSound2D(this, FlashlightSound, 0.7f);
 		}
 	}
+}
+
+void AProjectNCharacter::SetJumpCurrentCount(int NewCurrentJumpCount)
+{
+	JumpCurrentCount = NewCurrentJumpCount;
 }
 
 void AProjectNCharacter::TurnAtRate(float Rate)
