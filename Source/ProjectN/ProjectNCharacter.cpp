@@ -220,7 +220,6 @@ void AProjectNCharacter::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActo
 
 void AProjectNCharacter::SwitchCameraPOV()
 {
-
 	if (isTP) // to FirstPerson
 	{
 		FVector NewBoomLocation = FVector(-14.f, 30.f, 0.f);
@@ -229,8 +228,6 @@ void AProjectNCharacter::SwitchCameraPOV()
 		CameraBoom->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, "head");
 		CameraBoom->SetRelativeLocation(NewBoomLocation);
 		CameraBoom->SocketOffset = FVector(0.f, 0.f, 0.f);
-
-		//FollowCamera->SetRelativeLocation(NewBoomLocation); 
 
 		bUseControllerRotationYaw = true;
 
