@@ -101,6 +101,9 @@ AProjectNCharacter::AProjectNCharacter()
 	// Default POV condition
 	isTP = true;
 	isFP = false;
+
+	// Character is not dead and can die
+	bDiedAlready = false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -329,22 +332,58 @@ void AProjectNCharacter::SubstractOxygen()
 
 		if (Oxygen <= 0.f) // TODO: Apply damage every sec once oxygen <= 0
 		{
-			Death();
+			CallDeath();
 		}
 	}
 }
 
 void AProjectNCharacter::Death()
 {
-	if (!HealthComp->bDead)
+	if (!HealthComp->bDead && !bDiedAlready)
 	{
 		HealthComp->bDead = true;
+		bDiedAlready = true;
+
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetMesh()->SetSimulatePhysics(true);
+
+		// Play sounds
+		if (CharacterDeathSound)
+		{
+			UGameplayStatics::SpawnSound2D(this, CharacterDeathSound, 0.7f);
+		}
+
+		if (DeathImpactSound)
+		{
+			UGameplayStatics::SpawnSound2D(this, DeathImpactSound, 0.7f);
+		}
+
+		// Call blueprint event
+		OnDied();
+
+		// Detach controller from character so we can't perform any actions
 		DetachFromControllerPendingDestroy();
 
 		FTimerHandle SnapshotTimer;
 		GetWorldTimerManager().SetTimer(SnapshotTimer, this, &AProjectNCharacter::RagdollSnapshot, 3.f, false);
+	}
+}
+
+void AProjectNCharacter::CallDeath()
+{
+	if (!HealthComp->bDead && !bDiedAlready)
+	{
+		// If in FP - change POV and set a little delay before Death(), otherwise - just call Death()
+		if (isFP)
+		{
+			SwitchCameraPOV();
+
+			GetWorldTimerManager().SetTimer(CallDeathTimer, this, &AProjectNCharacter::Death, 0.05f, false);
+		}
+		else
+		{
+			Death();
+		}
 	}
 }
 

@@ -52,10 +52,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "HUD")
 	FString CurrentObjective;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Oxygen")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Water|Oxygen")
 	float Oxygen;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Oxygen")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Water|Oxygen")
 	float OxygenMax;
 
 	FTimerHandle SubstractOxygenTimer;
@@ -63,27 +63,38 @@ public:
 	FTimerHandle AddOxygenTimer;
 
 	/** Used in fade in\out animation for Oxygen Bar. */
-	UFUNCTION(BlueprintImplementableEvent, Category = "Water movement events")
+	UFUNCTION(BlueprintImplementableEvent, Category = "Water|Movement")
 	void OnSubmerged();
 
 	/** Used in fade in\out animation for Oxygen Bar. */
-	UFUNCTION(BlueprintImplementableEvent, Category = "Water movement events")
+	UFUNCTION(BlueprintImplementableEvent, Category = "Water|Movement")
 	void OnEmerged();
 
 	/** Used in Oxygen Bar set percent. */
-	UFUNCTION(BlueprintImplementableEvent, Category = "Water movement events")
+	UFUNCTION(BlueprintImplementableEvent, Category = "Water|Movement")
 	void OnOxygenSubstracted();
 
 	/** Used in Oxygen Bar set percent. */
-	UFUNCTION(BlueprintImplementableEvent, Category = "Water movement events")
+	UFUNCTION(BlueprintImplementableEvent, Category = "Water|Movement")
 	void OnOxygenAdded();
 
 protected:
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Flashlight")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Death|Sounds")
+	USoundBase* CharacterDeathSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Death|Sounds")
+	USoundBase* DeathImpactSound;
+
+	/** Checks if we are dead before using Death(). 
+	 * This should fix some cases when Death() is called more than once simultaneously. 
+	 */
+	bool bDiedAlready;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Flashlight|Sounds")
 	USoundBase* FlashlightSound;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Flashlight|Components")
 	USpotLightComponent* Flashlight;
 
 	bool bFlashlightTurnedOn;
@@ -91,7 +102,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UNHealthComponent* HealthComp;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Water|Components")
 	UBoxComponent* BoxHead;
 
 	/** First person POV. */
@@ -143,11 +154,11 @@ protected:
 	void StopJumping();
 
 	/** Float up while in water. */
-	UFUNCTION(BlueprintCallable, Category = "Water Movement")
+	UFUNCTION(BlueprintCallable, Category = "Water|Movement")
 	void FloatUp(float Value);
 
 	/** Dive while in water. */
-	UFUNCTION(BlueprintCallable, Category = "Water Movement")
+	UFUNCTION(BlueprintCallable, Category = "Water|Movement")
 	void Dive(float Value);
 
 	UFUNCTION()
@@ -157,8 +168,20 @@ protected:
 	void SubstractOxygen();
 
 	/** Death function with saving pose snapshot. */
-	UFUNCTION(BlueprintCallable, Category = "Health")
+	UFUNCTION(BlueprintCallable, Category = "Health|Death|Functions")
 	void Death();
+
+	/** Called in blueprints to add some cosmetic stuff that is difficult/impossible to implement in C++ to death event
+	 * (i.e. timelines, widgets that are created in BP etc.)
+	 */
+	UFUNCTION(BlueprintImplementableEvent, Category = "Health|Death|Functions")
+	void OnDied();
+
+	FTimerHandle CallDeathTimer;
+
+	/** Calls Death() after a small delay and changes POV to Third Person if was in first. */
+	UFUNCTION(BlueprintCallable, Category = "Health|Death|Functions")
+	void CallDeath();
 
 	/** Save pose snapshot and turn off collision for mesh. */
 	void RagdollSnapshot();
