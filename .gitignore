@@ -98,5 +98,8 @@ Content/PoseAnimations/*
 Content/ThirdPerson/*
 Content/ThirdPersonBP/*
 
+# Water
+Content/CartoonWaterShader/*
+
 # VoxelPlugin needs to be downloaded from author's GDrive
 Plugins/VoxelFree/*

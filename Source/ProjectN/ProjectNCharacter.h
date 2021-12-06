@@ -86,6 +86,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Death|Sounds")
 	USoundBase* DeathImpactSound;
 
+	/** Our variable for checking whether keyboard input is active or not. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "POV")
+	bool bKeyboardInputEnabled;
+
 	/** Checks if we are dead before using Death(). 
 	 * This should fix some cases when Death() is called more than once simultaneously. 
 	 */
@@ -122,6 +126,10 @@ protected:
 	float MinTargetBoomLength;
 
 	void SwitchCameraPOV();
+
+	void SwimForward(float Value);
+
+	void SwimRight(float Value);
 
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);

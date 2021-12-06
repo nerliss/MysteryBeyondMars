@@ -104,6 +104,9 @@ AProjectNCharacter::AProjectNCharacter()
 
 	// Character is not dead and can die
 	bDiedAlready = false;
+
+	// Can provide input as default
+	bKeyboardInputEnabled = true;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -125,9 +128,11 @@ void AProjectNCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	// Switch on/off the flashlight
 	PlayerInputComponent->BindAction("SwitchFlashlight", IE_Pressed, this, &AProjectNCharacter::SwitchFlashlight);
 
-	// Swim up and dive while in water
+	// Swim movement
 	PlayerInputComponent->BindAxis("FloatUp", this, &AProjectNCharacter::FloatUp);
 	PlayerInputComponent->BindAxis("Dive", this, &AProjectNCharacter::Dive);
+	PlayerInputComponent->BindAxis("SwimForward", this, &AProjectNCharacter::SwimForward);
+	PlayerInputComponent->BindAxis("SwimRight", this, &AProjectNCharacter::SwimRight);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AProjectNCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AProjectNCharacter::MoveRight);
@@ -220,6 +225,123 @@ void AProjectNCharacter::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActo
 	}
 }
 
+void AProjectNCharacter::TurnAtRate(float Rate)
+{
+	// calculate delta for this frame from the rate information
+	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AProjectNCharacter::LookUpAtRate(float Rate)
+{
+	// calculate delta for this frame from the rate information
+	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AProjectNCharacter::MoveForward(float Value)
+{
+	if (bKeyboardInputEnabled)
+	{
+		if ((Controller != nullptr) && (Value != 0.0f) && !bOnWall)
+		{
+			// find out which way is forward
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+			// get forward vector
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			AddMovementInput(Direction, Value);
+		}
+	}
+}
+
+void AProjectNCharacter::MoveRight(float Value)
+{
+	if (bKeyboardInputEnabled)
+	{
+		if ((Controller != nullptr) && (Value != 0.0f) && !bOnWall)
+		{
+			// find out which way is right
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+			// get right vector 
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+			// add movement in that direction
+			AddMovementInput(Direction, Value);
+		}
+	}
+}
+
+void AProjectNCharacter::SwimForward(float Value)
+{
+	if (bInWater && Value != 0)
+	{
+		FVector Direction = GetFollowCamera()->GetForwardVector();
+		AddMovementInput(Direction, Value);
+	}
+}
+
+void AProjectNCharacter::SwimRight(float Value)
+{
+	if (bInWater && Value != 0)
+	{
+		FVector Direction = GetFollowCamera()->GetRightVector();
+		AddMovementInput(Direction, Value);
+	}
+}
+
+void AProjectNCharacter::FloatUp(float Value)
+{
+	if (bInWater && Value != 0.f)
+	{
+		// Set a diagonal-alike vector to move along
+		FVector NewDirectionVector = FVector(FollowCamera->GetForwardVector().X, FollowCamera->GetForwardVector().Y, 1.f);
+
+		AddMovementInput(NewDirectionVector, Value);
+	}
+}
+
+void AProjectNCharacter::Dive(float Value)
+{
+	if (bInWater && Value != 0.f)
+	{
+		// Set a diagonal-alike vector to move along
+		FVector NewDirectionVector = FVector(FollowCamera->GetForwardVector().X, FollowCamera->GetForwardVector().Y, -1.f);
+
+		AddMovementInput(NewDirectionVector, Value);
+	}
+}
+
+void AProjectNCharacter::Crouch()
+{
+	if (!bInWater)
+	{
+		ACharacter::Crouch();
+		bCrouching = true;
+	}
+}
+
+void AProjectNCharacter::StopCrouching()
+{
+	ACharacter::UnCrouch();
+	bCrouching = false;
+}
+
+void AProjectNCharacter::Jump()
+{
+	if (!bHanging)
+	{
+		if (!bInWater)
+		{
+			ACharacter::Jump();
+		}
+	}
+}
+
+void AProjectNCharacter::StopJumping()
+{
+	ACharacter::StopJumping();
+}
 
 void AProjectNCharacter::SwitchCameraPOV()
 {
@@ -252,59 +374,6 @@ void AProjectNCharacter::SwitchCameraPOV()
 
 		isFP = false;
 		isTP = true;
-	}
-}
-
-void AProjectNCharacter::Crouch()
-{
-	if (!bInWater)
-	{
-		ACharacter::Crouch();
-		bCrouching = true;
-	}
-}
-
-void AProjectNCharacter::StopCrouching()
-{
-	ACharacter::UnCrouch();
-	bCrouching = false;
-}
-
-void AProjectNCharacter::Jump()
-{
-	if (!bHanging) 
-	{
-		if (!bInWater) 
-		{
-			ACharacter::Jump();
-		}
-	}
-}
-
-void AProjectNCharacter::StopJumping()
-{
-	ACharacter::StopJumping();
-}
-
-void AProjectNCharacter::FloatUp(float Value)
-{
-	if (bInWater && Value != 0.f)
-	{
-		// Set a diagonal-alike vector to move along
-		FVector NewDirectionVector = FVector(FollowCamera->GetForwardVector().X, FollowCamera->GetForwardVector().Y, 1.f); 
-
-		AddMovementInput(NewDirectionVector, Value);
-	}
-}
-
-void AProjectNCharacter::Dive(float Value)
-{
-	if (bInWater && Value != 0.f)
-	{
-		// Set a diagonal-alike vector to move along
-		FVector NewDirectionVector = FVector(FollowCamera->GetForwardVector().X, FollowCamera->GetForwardVector().Y, -1.f);
-
-		AddMovementInput(NewDirectionVector, Value);
 	}
 }
 
@@ -423,45 +492,4 @@ void AProjectNCharacter::SwitchFlashlight()
 void AProjectNCharacter::SetJumpCurrentCount(int NewCurrentJumpCount)
 {
 	JumpCurrentCount = NewCurrentJumpCount;
-}
-
-void AProjectNCharacter::TurnAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
-}
-
-void AProjectNCharacter::LookUpAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
-}
-
-void AProjectNCharacter::MoveForward(float Value)
-{
-	if ((Controller != nullptr) && (Value != 0.0f) && !bOnWall)
-	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		// get forward vector
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
-	}
-}
-
-void AProjectNCharacter::MoveRight(float Value)
-{
-	if ((Controller != nullptr) && (Value != 0.0f) && !bOnWall)
-	{
-		// find out which way is right
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
-		// get right vector 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		// add movement in that direction
-		AddMovementInput(Direction, Value);
-	}
 }
