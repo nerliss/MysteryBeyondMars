@@ -15,6 +15,7 @@
 #include "Math/UnrealMathUtility.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 
 // Print string on screen macro
 #define DEBUGMESSAGE(x, ...) if(GEngine){GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT(x), __VA_ARGS__));}
@@ -277,7 +278,7 @@ void AProjectNCharacter::SwimForward(float Value)
 	if (bInWater && Value != 0)
 	{
 		FVector Direction = GetFollowCamera()->GetForwardVector();
-		AddMovementInput(Direction, Value);
+		AddMovementInput(Direction, Value * 10); // Value is multiplied so character would properly rotate towards the direction while swimming (idk it just works)
 	}
 }
 
@@ -286,7 +287,7 @@ void AProjectNCharacter::SwimRight(float Value)
 	if (bInWater && Value != 0)
 	{
 		FVector Direction = GetFollowCamera()->GetRightVector();
-		AddMovementInput(Direction, Value);
+		AddMovementInput(Direction, Value * 10);
 	}
 }
 
@@ -413,6 +414,9 @@ void AProjectNCharacter::Death()
 		HealthComp->bDead = true;
 		bDiedAlready = true;
 
+		// Remove all widgets before creating death screen
+		UWidgetLayoutLibrary::RemoveAllWidgets(this);
+
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetMesh()->SetSimulatePhysics(true);
 
@@ -433,6 +437,7 @@ void AProjectNCharacter::Death()
 		// Detach controller from character so we can't perform any actions
 		DetachFromControllerPendingDestroy();
 
+		// Set timer for ragdoll snapshot - optimization. Probably to be deleted, because after death, game pauses sooner than this block of code is called
 		FTimerHandle SnapshotTimer;
 		GetWorldTimerManager().SetTimer(SnapshotTimer, this, &AProjectNCharacter::RagdollSnapshot, 3.f, false);
 	}
