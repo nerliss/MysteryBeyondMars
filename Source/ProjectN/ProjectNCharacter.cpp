@@ -90,6 +90,7 @@ AProjectNCharacter::AProjectNCharacter()
 
 	// For wall running
 	bOnWall = false;
+	bCanWallRun = true;
 
 	// For ledge climbing
 	bHanging = false;
@@ -375,6 +376,37 @@ void AProjectNCharacter::SwitchCameraPOV()
 
 		isFP = false;
 		isTP = true;
+	}
+}
+
+void AProjectNCharacter::InitWallRun(float PlayerWallDirectionsDotProduct, float WallRunSpeed)
+{
+	if (UKismetMathLibrary::InRange_FloatFloat(PlayerWallDirectionsDotProduct, -0.43f, 0.43f))
+	{
+		if (bCanWallRun)
+		{
+			// Vertical WallRun
+			GetCharacterMovement()->SetPlaneConstraintNormal(FVector(1.f, 1.f, 0.f));
+
+			LaunchCharacter(FVector(0.f, 0.f, WallRunSpeed), true, true);
+
+			bCanWallRun = false;
+		}
+	}
+	else
+	{
+		if (bCanWallRun)
+		{
+			// Horizontal WallRun 
+			GetCharacterMovement()->SetPlaneConstraintNormal(FVector(0, 0, 1));
+
+			FVector CapsuleForwardVector = GetCapsuleComponent()->GetForwardVector();
+			FVector LaunchVelocity = CapsuleForwardVector * FVector(WallRunSpeed, WallRunSpeed, 0);
+
+			LaunchCharacter(LaunchVelocity, true, true);
+
+			bCanWallRun = false;
+		}
 	}
 }
 

@@ -38,9 +38,6 @@ public:
 	bool bCrouching;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
-	bool bOnWall;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 	bool bHanging;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
@@ -126,6 +123,20 @@ protected:
 	float MinTargetBoomLength;
 
 	void SwitchCameraPOV();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool bOnWall;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "WallRun|Variables")
+	bool bCanWallRun;
+
+	/** 
+	 * Called on wallrun timeline update node.
+	 * @param PlayerWallDirectionsDotProduct  Dot product between player's forward vector and wall's normal that he is facing
+	 * @param WallRunSpeed	Wallrunning speed that is passed into LaunchCharacter()
+	 */
+	UFUNCTION(BlueprintCallable, Category = "WallRun|Functions")
+	void InitWallRun(float PlayerWallDirectionsDotProduct, float WallRunSpeed);
 
 	void SwimForward(float Value);
 
